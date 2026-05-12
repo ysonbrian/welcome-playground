@@ -118,6 +118,10 @@ export function SpinWheel() {
     if (!spinning && items.length > 0) draw(angleRef.current);
   }, [draw, spinning, items.length]);
 
+  useEffect(() => {
+    if (result && !items.includes(result)) setResult(null);
+  }, [items, result]);
+
   const spin = useCallback(() => {
     if (spinning || items.length < 2) return;
 
