@@ -7,11 +7,6 @@ const API_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY;
 
 type PlaceResult = kakao.maps.services.PlaceResult;
 
-const CATEGORY_OPTIONS = [
-  { label: "음식점", code: "FD6" },
-  { label: "카페",   code: "CE7" },
-  { label: "전체",   code: ""    },
-] as const;
 
 const MY_LOCATION_DOT = `<div style="width:18px;height:18px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(59,130,246,0.6)"></div>`;
 
@@ -29,7 +24,6 @@ export function KakaoMap() {
   const [locating,       setLocating]       = useState(false);
   const [locationDenied, setLocationDenied] = useState(false);
   const [query,          setQuery]          = useState("");
-  const [category,       setCategory]       = useState("FD6");
   const [places,         setPlaces]         = useState<PlaceResult[]>([]);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
   const [noResult,       setNoResult]       = useState(false);
@@ -45,7 +39,7 @@ export function KakaoMap() {
   /* ── 돌림판 추가 ── */
   const handleAddToWheel = useCallback((place: PlaceResult) => {
     const result = addToWheel(place.place_name);
-    if      (result === "added")     showToast(`"${place.place_name.slice(0, 8)}" 돌림판에 추가됨`);
+    if      (result === "added")     showToast(`"${place.place_name}" 돌림판에 추가됨`);
     else if (result === "duplicate") showToast("이미 돌림판에 있어요");
     else                             showToast(`돌림판이 가득 찼어요 (최대 ${MAX_WHEEL_ITEMS}개)`);
   }, [addToWheel, showToast]);
@@ -121,7 +115,6 @@ export function KakaoMap() {
     if (!query.trim() || !mapRef.current) return;
     const ps = new window.kakao.maps.services.Places();
     const options: kakao.maps.services.PlacesSearchOptions = {};
-    if (category) options.category_group_code = category;
     if (userLocationRef.current) { options.location = userLocationRef.current; options.radius = 2000; }
     setNoResult(false);
 
@@ -147,7 +140,7 @@ export function KakaoMap() {
       });
       mapRef.current!.setBounds(bounds);
     }, options);
-  }, [query, category, clearMarkers]);
+  }, [query, clearMarkers]);
 
   /* ── 목록 클릭 ── */
   const handlePlaceClick = useCallback((place: PlaceResult, index: number) => {
@@ -179,49 +172,33 @@ export function KakaoMap() {
 
       {/* 검색 바 */}
       <div className="shrink-0 border-b border-gray-200 bg-white px-3 py-2 md:px-4 md:py-3">
-        {/* 모바일: 2줄 */}
-        <div className="flex flex-col gap-2 md:hidden">
-          <div className="flex gap-2">
-            <select
-              value={category} onChange={(e) => setCategory(e.target.value)} disabled={!ready}
-              className="shrink-0 rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-gray-50"
-            >
-              {CATEGORY_OPTIONS.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
-            </select>
-            <button
-              onClick={requestLocation} disabled={!ready || locating}
-              title={locationDenied ? "위치 권한이 거부되었습니다" : "내 위치로 이동"}
-              className={`ml-auto flex shrink-0 items-center justify-center rounded-lg border px-3 py-2 transition-colors disabled:opacity-50 ${userLocationRef.current ? "border-blue-300 bg-blue-50 text-blue-600" : "border-gray-300 bg-white text-gray-600"}`}
-            >
-              {locating
-                ? <span className="animate-spin text-sm">⟳</span>
-                : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-              }
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text" value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && search()}
-              placeholder={!ready ? "지도 로딩 중..." : userLocationRef.current ? "검색 (내 위치 기반)" : "검색어 입력..."}
-              disabled={!ready}
-              className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 disabled:bg-gray-50"
-            />
-            <button
-              onClick={search} disabled={!ready || !query.trim()}
-              className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-            >검색</button>
-          </div>
+        {/* 모바일: 1줄 */}
+        <div className="flex gap-2 md:hidden">
+          <input
+            type="text" value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && search()}
+            placeholder={!ready ? "지도 로딩 중..." : userLocationRef.current ? "검색 (내 위치 기반)" : "검색어 입력..."}
+            disabled={!ready}
+            className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 disabled:bg-gray-50"
+          />
+          <button
+            onClick={requestLocation} disabled={!ready || locating}
+            title={locationDenied ? "위치 권한이 거부되었습니다" : "내 위치로 이동"}
+            className={`flex shrink-0 items-center justify-center rounded-lg border px-3 py-2 transition-colors disabled:opacity-50 ${userLocationRef.current ? "border-blue-300 bg-blue-50 text-blue-600" : "border-gray-300 bg-white text-gray-600"}`}
+          >
+            {locating
+              ? <span className="animate-spin text-sm">⟳</span>
+              : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            }
+          </button>
+          <button
+            onClick={search} disabled={!ready || !query.trim()}
+            className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          >검색</button>
         </div>
         {/* 데스크톱: 1줄 */}
         <div className="hidden items-center gap-2 md:flex">
-          <select
-            value={category} onChange={(e) => setCategory(e.target.value)} disabled={!ready}
-            className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-gray-50"
-          >
-            {CATEGORY_OPTIONS.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
-          </select>
           <input
             type="text" value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -320,7 +297,7 @@ export function KakaoMap() {
                 </div>
                 <ul className="flex-1 overflow-y-auto">
                   {places.map((place, i) => {
-                    const inWheel  = wheelItems.includes(place.place_name.slice(0, 8));
+                    const inWheel  = wheelItems.includes(place.place_name.trim());
                     const isFull   = wheelItems.length >= MAX_WHEEL_ITEMS;
                     return (
                       <li

@@ -10,7 +10,7 @@ import { ChatSidebar } from "./_components/ChatSidebar";
 import { WheelItemsProvider } from "./_components/WheelItemsProvider";
 
 export const metadata: Metadata = {
-  title: "FoodPicker",
+  title: "Randoo",
   description: "지도 검색과 돌림판으로 원하는 결과를 골라보세요",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

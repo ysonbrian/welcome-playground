@@ -12,14 +12,14 @@ export function Navbar({ session }: NavbarProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/map", label: "음식점 지도" },
+    { href: "/map", label: "지도" },
     { href: "/wheel", label: "돌림판" },
   ];
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center border-b border-gray-200 bg-white px-3 shadow-sm md:px-6">
       <Link href="/" className="mr-4 text-base font-bold text-gray-900 md:mr-8 md:text-lg">
-        FoodPicker
+        Randoo
       </Link>
 
       <div className="flex gap-0.5 md:gap-1">

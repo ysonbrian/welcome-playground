@@ -68,7 +68,7 @@ export function WheelItemsProvider({ children }: { children: ReactNode }) {
   const items = rows.map((r) => r.name);
 
   const addItem = (name: string): AddResult => {
-    const trimmed = name.trim().slice(0, 8);
+    const trimmed = name.trim();
     if (!trimmed || items.includes(trimmed)) return "duplicate";
     if (items.length >= MAX_WHEEL_ITEMS) return "full";
 

@@ -205,10 +205,10 @@ export function SpinWheel() {
 
       // 4. 이미 추가된 항목 제외 후 셔플, 슬롯만큼 추가
       // seenNames: 현재 wheel 항목 + 이번 배치에서 추가될 이름 모두 추적 (중복 방지)
-      const seenNames = new Set(items.map((n) => n.slice(0, 8)));
+      const seenNames = new Set(items);
       const deduped = places
         .filter((p) => {
-          const name = p.place_name.slice(0, 8);
+          const name = p.place_name.trim();
           if (seenNames.has(name)) return false;
           seenNames.add(name);
           return true;
@@ -324,7 +324,7 @@ export function SpinWheel() {
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
             placeholder="항목 추가..."
-            maxLength={8}
+            maxLength={20}
             disabled={items.length >= MAX_WHEEL_ITEMS || spinning}
             className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 disabled:bg-gray-50 disabled:text-gray-400"
           />
@@ -357,29 +357,43 @@ export function SpinWheel() {
           <p className="py-6 text-center text-sm text-gray-300">아직 항목이 없어요</p>
         ) : (
           <ul className="space-y-1.5">
-            {items.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm"
-                style={{ backgroundColor: `${COLORS[i % COLORS.length]}2e` }}
-              >
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <span
-                    className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                    style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                  />
-                  <span className="truncate text-gray-800">{item}</span>
-                </div>
-                <button
-                  onClick={() => removeItem(i)}
-                  disabled={spinning}
-                  className="ml-2 flex-shrink-0 text-gray-300 transition-colors hover:text-red-400 disabled:cursor-not-allowed"
-                  aria-label="삭제"
+            {items.map((item, i) => {
+              const pct = (100 / items.length).toFixed(1);
+              return (
+                <li
+                  key={i}
+                  className="rounded-lg px-3 py-2 text-sm"
+                  style={{ backgroundColor: `${COLORS[i % COLORS.length]}2e` }}
                 >
-                  ✕
-                </button>
-              </li>
-            ))}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span
+                        className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                      />
+                      <span className="break-all text-gray-800">{item}</span>
+                    </div>
+                    <button
+                      onClick={() => removeItem(i)}
+                      disabled={spinning}
+                      className="ml-2 flex-shrink-0 text-gray-300 transition-colors hover:text-red-400 disabled:cursor-not-allowed"
+                      aria-label="삭제"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 pl-4">
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%`, backgroundColor: COLORS[i % COLORS.length] }}
+                      />
+                    </div>
+                    <span className="flex-shrink-0 text-xs font-medium text-gray-400">{pct}%</span>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
 

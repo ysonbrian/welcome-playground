@@ -216,7 +216,7 @@ export function ChatSidebar() {
                     <span className="text-xs font-medium text-gray-500">{msg.nickname}</span>
                   )}
                   <div
-                    className={`max-w-[85%] break-words rounded-2xl px-3 py-2 text-sm ${
+                    className={`max-w-[85%] break-words rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
                       isMine
                         ? "rounded-br-sm bg-blue-600 text-white"
                         : "rounded-bl-sm bg-gray-100 text-gray-800"
@@ -237,13 +237,19 @@ export function ChatSidebar() {
       {configured && (
         <div className="shrink-0 border-t border-gray-200 p-3">
           <div className="flex gap-2">
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="메시지 입력..."
-              className="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              placeholder="메시지 입력... (Shift+Enter 줄바꿈)"
+              rows={1}
+              className="flex-1 resize-none rounded-xl border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              style={{ maxHeight: "120px", overflowY: "auto" }}
+              onInput={(e) => {
+                const el = e.currentTarget;
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }}
             />
             <button
               onClick={() => void sendMessage()}
