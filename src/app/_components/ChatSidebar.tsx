@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase, type ChatMessage } from "~/lib/supabase";
 
 function getOrCreateNickname(): string {
@@ -32,13 +32,21 @@ export function ChatSidebar() {
   const [configured, setConfigured] = useState(true);
   const [error,      setError]      = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const bottomRef  = useRef<HTMLDivElement>(null);
-  const seenIds    = useRef<Set<number>>(new Set());
+  const bottomRef        = useRef<HTMLDivElement>(null);
+  const scrollBoxes      = useRef<HTMLDivElement[]>([]);
+  const seenIds          = useRef<Set<number>>(new Set());
+  const initialScrolled  = useRef(false);
+
+  const scrollBoxRef = useCallback((el: HTMLDivElement | null) => {
+    if (el && !scrollBoxes.current.includes(el)) {
+      scrollBoxes.current.push(el);
+    }
+  }, []);
 
   const addMessage = (msg: ChatMessage) => {
     if (seenIds.current.has(msg.id)) return;
     seenIds.current.add(msg.id);
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]);
   };
 
   useEffect(() => {
@@ -85,9 +93,19 @@ export function ChatSidebar() {
     return () => { void supabase!.removeChannel(channel); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const scrollToBottom = useCallback(() => {
+    scrollBoxes.current.forEach((el) => { el.scrollTop = el.scrollHeight; });
+  }, []);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (messages.length === 0) return;
+    if (!initialScrolled.current) {
+      requestAnimationFrame(scrollToBottom);
+      initialScrolled.current = true;
+    } else {
+      scrollToBottom();
+    }
+  }, [messages, scrollToBottom]);
 
   const sendMessage = async () => {
     const content = input.trim();
@@ -116,11 +134,14 @@ export function ChatSidebar() {
     }
 
     if (data) {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimistic.id ? (data as ChatMessage) : m)),
-      );
+      const realMsg = data as ChatMessage;
       seenIds.current.delete(optimistic.id);
-      seenIds.current.add((data as ChatMessage).id);
+      seenIds.current.add(realMsg.id);
+      setMessages((prev) =>
+        prev
+          .filter((m) => m.id !== realMsg.id)
+          .map((m) => (m.id === optimistic.id ? realMsg : m)),
+      );
     }
   };
 
@@ -179,7 +200,7 @@ export function ChatSidebar() {
 
       {/* 메시지 목록 */}
       {configured && (
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div ref={scrollBoxRef} className="flex-1 overflow-y-auto px-3 py-3">
           {messages.length === 0 && !error && (
             <p className="mt-4 text-center text-xs text-gray-300">첫 메시지를 보내보세요!</p>
           )}

@@ -25,7 +25,7 @@ export default function Home() {
           <span className="text-4xl">🎡</span>
           <h2 className="text-xl font-semibold text-gray-900">돌림판</h2>
           <p className="text-sm text-gray-500">
-            메뉴를 입력하고 돌려서 오늘의 메뉴를 정해보세요
+            항목을 추가하고 돌려서 결과를 정해보세요
           </p>
         </Link>
       </div>

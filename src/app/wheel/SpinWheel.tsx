@@ -296,7 +296,7 @@ export function SpinWheel() {
 
         {result && !spinning && (
           <div className="w-full rounded-2xl border-2 border-blue-200 bg-blue-50 px-10 py-5 text-center shadow-sm">
-            <p className="text-sm font-medium text-blue-400">오늘의 메뉴는</p>
+            <p className="text-sm font-medium text-blue-400">선택된 항목</p>
             <p className="mt-1 text-3xl font-extrabold text-blue-700">{result}</p>
           </div>
         )}
@@ -305,7 +305,7 @@ export function SpinWheel() {
       {/* 메뉴 목록 */}
       <div className="flex w-full flex-col gap-4 md:w-56">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">메뉴 목록</h2>
+          <h2 className="text-lg font-semibold text-gray-900">항목 목록</h2>
           {items.length > 0 && (
             <button
               onClick={() => { if (confirm("전체 삭제할까요?")) storeClear(); }}
@@ -323,7 +323,7 @@ export function SpinWheel() {
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
-            placeholder="메뉴 추가..."
+            placeholder="항목 추가..."
             maxLength={8}
             disabled={items.length >= MAX_WHEEL_ITEMS || spinning}
             className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 disabled:bg-gray-50 disabled:text-gray-400"
@@ -354,7 +354,7 @@ export function SpinWheel() {
         )}
 
         {items.length === 0 && !loading ? (
-          <p className="py-6 text-center text-sm text-gray-300">아직 메뉴가 없어요</p>
+          <p className="py-6 text-center text-sm text-gray-300">아직 항목이 없어요</p>
         ) : (
           <ul className="space-y-1.5">
             {items.map((item, i) => (

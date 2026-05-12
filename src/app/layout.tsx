@@ -11,7 +11,7 @@ import { WheelItemsProvider } from "./_components/WheelItemsProvider";
 
 export const metadata: Metadata = {
   title: "FoodPicker",
-  description: "음식점 지도와 돌림판으로 오늘의 메뉴를 골라보세요",
+  description: "지도 검색과 돌림판으로 원하는 결과를 골라보세요",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
