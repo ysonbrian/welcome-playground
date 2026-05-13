@@ -1,42 +1,35 @@
-import { ArrowDown, ArrowUp, Minus } from "./icons";
+import { StocksView, type StockItem } from "./StocksView";
 
 const US_STOCKS = [
-  { symbol: "NVDA",  name: "NVIDIA"    },
-  { symbol: "AAPL",  name: "Apple"     },
-  { symbol: "MSFT",  name: "Microsoft" },
-  { symbol: "TSLA",  name: "Tesla"     },
-  { symbol: "META",  name: "Meta"      },
-  { symbol: "AMZN",  name: "Amazon"    },
-  { symbol: "GOOGL", name: "Alphabet"  },
-  { symbol: "AMD",   name: "AMD"       },
-  { symbol: "NFLX",  name: "Netflix"   },
-  { symbol: "PLTR",  name: "Palantir"  },
+  { symbol: "NVDA",  name: "NVIDIA",    tvSymbol: "NASDAQ:NVDA"  },
+  { symbol: "AAPL",  name: "Apple",     tvSymbol: "NASDAQ:AAPL"  },
+  { symbol: "MSFT",  name: "Microsoft", tvSymbol: "NASDAQ:MSFT"  },
+  { symbol: "TSLA",  name: "Tesla",     tvSymbol: "NASDAQ:TSLA"  },
+  { symbol: "META",  name: "Meta",      tvSymbol: "NASDAQ:META"  },
+  { symbol: "AMZN",  name: "Amazon",    tvSymbol: "NASDAQ:AMZN"  },
+  { symbol: "GOOGL", name: "Alphabet",  tvSymbol: "NASDAQ:GOOGL" },
+  { symbol: "AMD",   name: "AMD",       tvSymbol: "NASDAQ:AMD"   },
+  { symbol: "NFLX",  name: "Netflix",   tvSymbol: "NASDAQ:NFLX"  },
+  { symbol: "PLTR",  name: "Palantir",  tvSymbol: "NYSE:PLTR"    },
 ];
 
 const KOREAN_STOCKS = [
-  { symbol: "005930.KS", name: "삼성전자" },
-  { symbol: "000660.KS", name: "SK하이닉스" },
-  { symbol: "005380.KS", name: "현대차" },
-  { symbol: "035420.KS", name: "NAVER" },
-  { symbol: "035720.KS", name: "카카오" },
-  { symbol: "000270.KS", name: "기아" },
-  { symbol: "006400.KS", name: "삼성SDI" },
-  { symbol: "051910.KS", name: "LG화학" },
-  { symbol: "068270.KS", name: "셀트리온" },
-  { symbol: "105560.KS", name: "KB금융" },
+  { symbol: "005930.KS", name: "삼성전자",   tvSymbol: "KRX:005930" },
+  { symbol: "000660.KS", name: "SK하이닉스", tvSymbol: "KRX:000660" },
+  { symbol: "005380.KS", name: "현대차",     tvSymbol: "KRX:005380" },
+  { symbol: "035420.KS", name: "NAVER",     tvSymbol: "KRX:035420" },
+  { symbol: "035720.KS", name: "카카오",     tvSymbol: "KRX:035720" },
+  { symbol: "000270.KS", name: "기아",       tvSymbol: "KRX:000270" },
+  { symbol: "006400.KS", name: "삼성SDI",    tvSymbol: "KRX:006400" },
+  { symbol: "051910.KS", name: "LG화학",     tvSymbol: "KRX:051910" },
+  { symbol: "068270.KS", name: "셀트리온",   tvSymbol: "KRX:068270" },
+  { symbol: "105560.KS", name: "KB금융",     tvSymbol: "KRX:105560" },
 ];
-
-interface StockItem {
-  symbol: string;
-  name: string;
-  price: string;
-  changePercent: string;
-  sign: "up" | "down" | "flat";
-}
 
 async function fetchYahooStock(
   symbol: string,
   name: string,
+  tvSymbol: string,
   formatPrice: (n: number) => string,
 ): Promise<StockItem | null> {
   try {
@@ -72,6 +65,7 @@ async function fetchYahooStock(
     return {
       symbol,
       name,
+      tvSymbol,
       price: formatPrice(current),
       changePercent: (num >= 0 ? "+" : "") + num.toFixed(2) + "%",
       sign: num > 0 ? "up" : num < 0 ? "down" : "flat",
@@ -83,8 +77,8 @@ async function fetchYahooStock(
 
 async function fetchUSStocks(): Promise<StockItem[]> {
   const results = await Promise.all(
-    US_STOCKS.map(({ symbol, name }) =>
-      fetchYahooStock(symbol, name, (n) => `$${n.toFixed(2)}`),
+    US_STOCKS.map(({ symbol, name, tvSymbol }) =>
+      fetchYahooStock(symbol, name, tvSymbol, (n) => `$${n.toFixed(2)}`),
     ),
   );
   return results.filter(Boolean) as StockItem[];
@@ -92,56 +86,11 @@ async function fetchUSStocks(): Promise<StockItem[]> {
 
 async function fetchKoreanStocks(): Promise<StockItem[]> {
   const results = await Promise.all(
-    KOREAN_STOCKS.map(({ symbol, name }) =>
-      fetchYahooStock(symbol, name, (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`),
+    KOREAN_STOCKS.map(({ symbol, name, tvSymbol }) =>
+      fetchYahooStock(symbol, name, tvSymbol, (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`),
     ),
   );
   return results.filter(Boolean) as StockItem[];
-}
-
-function StockRow({ stock }: { stock: StockItem }) {
-  const colors = {
-    up:   { text: "text-blue-600",  bg: "bg-blue-50",   border: "border-blue-100"  },
-    down: { text: "text-red-500",   bg: "bg-red-50",    border: "border-red-100"   },
-    flat: { text: "text-gray-400",  bg: "bg-gray-50",   border: "border-gray-100"  },
-  }[stock.sign];
-
-  const Icon = stock.sign === "up" ? ArrowUp : stock.sign === "down" ? ArrowDown : Minus;
-
-  return (
-    <div className={`flex items-center justify-between rounded-xl border px-4 py-3 ${colors.bg} ${colors.border}`}>
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-gray-900">{stock.name}</p>
-        <p className="text-xs text-gray-400">{stock.symbol}</p>
-      </div>
-      <div className="ml-4 flex flex-col items-end gap-0.5 shrink-0">
-        <p className="text-sm font-medium text-gray-700">{stock.price}</p>
-        <span className={`flex items-center gap-0.5 text-xs font-semibold ${colors.text}`}>
-          <Icon />
-          {stock.changePercent}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, flag, stocks, empty }: {
-  title: string; flag: string; stocks: StockItem[]; empty: string;
-}) {
-  return (
-    <section>
-      <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-gray-800">
-        <span>{flag}</span>{title}
-      </h2>
-      {stocks.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-gray-200 py-8 text-center text-sm text-gray-400">{empty}</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {stocks.map((s) => <StockRow key={s.symbol} stock={s} />)}
-        </div>
-      )}
-    </section>
-  );
 }
 
 export default async function StocksPage() {
@@ -155,19 +104,7 @@ export default async function StocksPage() {
           오늘 주목할 만한 미국·한국 주요 종목의 등락률을 한눈에 확인하세요.
         </p>
       </div>
-
-      <div className="flex flex-col gap-8">
-        <Section
-          flag="🇺🇸" title="미국 시장 (거래량 상위 10)"
-          stocks={usStocks}
-          empty="미국 시장 데이터를 불러올 수 없어요"
-        />
-        <Section
-          flag="🇰🇷" title="한국 시장 (시가총액 상위 10)"
-          stocks={krStocks}
-          empty="한국 시장 데이터를 불러올 수 없어요"
-        />
-      </div>
+      <StocksView usStocks={usStocks} krStocks={krStocks} />
     </div>
   );
 }
