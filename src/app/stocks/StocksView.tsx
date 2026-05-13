@@ -14,8 +14,8 @@ export interface StockItem {
 
 function StockCard({ stock, onClick }: { stock: StockItem; onClick: () => void }) {
   const colors = {
-    up:   { text: "text-blue-600", bg: "bg-blue-50",  border: "border-blue-100"  },
-    down: { text: "text-red-500",  bg: "bg-red-50",   border: "border-red-100"   },
+    up:   { text: "text-red-500",  bg: "bg-red-50",   border: "border-red-100"   },
+    down: { text: "text-blue-600", bg: "bg-blue-50",  border: "border-blue-100"  },
     flat: { text: "text-gray-400", bg: "bg-gray-50",  border: "border-gray-100"  },
   }[stock.sign];
   const Icon = stock.sign === "up" ? ArrowUp : stock.sign === "down" ? ArrowDown : Minus;
@@ -80,7 +80,7 @@ function ChartModal({ stock, onClose }: { stock: StockItem; onClose: () => void 
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-700">{stock.price}</span>
-            <span className={`text-sm font-bold ${stock.sign === "up" ? "text-blue-600" : stock.sign === "down" ? "text-red-500" : "text-gray-400"}`}>
+            <span className={`text-sm font-bold ${stock.sign === "up" ? "text-red-500" : stock.sign === "down" ? "text-blue-600" : "text-gray-400"}`}>
               {stock.changePercent}
             </span>
             <button onClick={onClose} className="ml-2 text-gray-300 hover:text-gray-600">✕</button>
