@@ -19,6 +19,12 @@ const SERVICES = [
     title: "주식",
     desc: "미국·한국 주요 종목의 등락률을 한눈에 확인하세요",
   },
+  {
+    href: "/crypto",
+    emoji: "🪙",
+    title: "암호화폐",
+    desc: "시가총액 상위 코인의 등락률을 한눈에 확인하세요",
+  },
 ];
 
 export default function Home() {
@@ -28,7 +34,7 @@ export default function Home() {
       <p className="mb-10 text-center text-base text-gray-400">
         다양한 기능을 자유롭게 즐겨보세요 — 당신만의 놀이터입니다
       </p>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {SERVICES.map((s) => (
           <Link
             key={s.href}
