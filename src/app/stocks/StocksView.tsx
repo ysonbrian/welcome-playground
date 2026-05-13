@@ -19,10 +19,14 @@ function StockCard({ stock, onClick }: { stock: StockItem; onClick: () => void }
     flat: { text: "text-gray-400", bg: "bg-gray-50",  border: "border-gray-100"  },
   }[stock.sign];
   const Icon = stock.sign === "up" ? ArrowUp : stock.sign === "down" ? ArrowDown : Minus;
+  const isKrx = stock.tvSymbol.startsWith("KRX:");
 
   return (
     <button
-      onClick={onClick}
+      onClick={isKrx
+        ? () => window.open(`https://www.tradingview.com/chart/?symbol=${stock.tvSymbol}`, "_blank")
+        : onClick
+      }
       className={`flex w-full cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-left transition-opacity hover:opacity-80 ${colors.bg} ${colors.border}`}
     >
       <div className="min-w-0">
