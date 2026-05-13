@@ -1,6 +1,17 @@
 import { ArrowDown, ArrowUp, Minus } from "./icons";
 
-const KEY = process.env.ALPHA_VANTAGE_API_KEY;
+const US_STOCKS = [
+  { symbol: "NVDA",  name: "NVIDIA"    },
+  { symbol: "AAPL",  name: "Apple"     },
+  { symbol: "MSFT",  name: "Microsoft" },
+  { symbol: "TSLA",  name: "Tesla"     },
+  { symbol: "META",  name: "Meta"      },
+  { symbol: "AMZN",  name: "Amazon"    },
+  { symbol: "GOOGL", name: "Alphabet"  },
+  { symbol: "AMD",   name: "AMD"       },
+  { symbol: "NFLX",  name: "Netflix"   },
+  { symbol: "PLTR",  name: "Palantir"  },
+];
 
 const KOREAN_STOCKS = [
   { symbol: "005930.KS", name: "삼성전자" },
@@ -23,31 +34,11 @@ interface StockItem {
   sign: "up" | "down" | "flat";
 }
 
-async function fetchUSStocks(): Promise<StockItem[]> {
-  try {
-    const res = await fetch(
-      `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${KEY}`,
-      { next: { revalidate: 86400 } },
-    );
-    const data = (await res.json()) as Record<string, unknown>;
-    const list = (data.most_actively_traded ?? []) as Record<string, string>[];
-    return list.slice(0, 10).map((s) => {
-      const pct = s.change_percentage ?? "0%";
-      const num = parseFloat(pct);
-      return {
-        symbol: s.ticker ?? "",
-        name: s.ticker ?? "",
-        price: `$${Number(s.price).toFixed(2)}`,
-        changePercent: pct.replace("%", "") + "%",
-        sign: num > 0 ? "up" : num < 0 ? "down" : "flat",
-      };
-    });
-  } catch {
-    return [];
-  }
-}
-
-async function fetchKoreanStock(symbol: string, name: string): Promise<StockItem | null> {
+async function fetchYahooStock(
+  symbol: string,
+  name: string,
+  formatPrice: (n: number) => string,
+): Promise<StockItem | null> {
   try {
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=2d`,
@@ -81,7 +72,7 @@ async function fetchKoreanStock(symbol: string, name: string): Promise<StockItem
     return {
       symbol,
       name,
-      price: `₩${current.toLocaleString("ko-KR")}`,
+      price: formatPrice(current),
       changePercent: (num >= 0 ? "+" : "") + num.toFixed(2) + "%",
       sign: num > 0 ? "up" : num < 0 ? "down" : "flat",
     };
@@ -90,9 +81,20 @@ async function fetchKoreanStock(symbol: string, name: string): Promise<StockItem
   }
 }
 
+async function fetchUSStocks(): Promise<StockItem[]> {
+  const results = await Promise.all(
+    US_STOCKS.map(({ symbol, name }) =>
+      fetchYahooStock(symbol, name, (n) => `$${n.toFixed(2)}`),
+    ),
+  );
+  return results.filter(Boolean) as StockItem[];
+}
+
 async function fetchKoreanStocks(): Promise<StockItem[]> {
   const results = await Promise.all(
-    KOREAN_STOCKS.map(({ symbol, name }) => fetchKoreanStock(symbol, name)),
+    KOREAN_STOCKS.map(({ symbol, name }) =>
+      fetchYahooStock(symbol, name, (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`),
+    ),
   );
   return results.filter(Boolean) as StockItem[];
 }
