@@ -12,8 +12,9 @@ export function Navbar({ session }: NavbarProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/map", label: "지도" },
-    { href: "/wheel", label: "돌림판" },
+    { href: "/map",    label: "지도"   },
+    { href: "/wheel",  label: "돌림판" },
+    { href: "/stocks", label: "주식"   },
   ];
 
   return (
